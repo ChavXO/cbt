@@ -97,7 +97,7 @@ class Stage1Lib( val logger: Logger ) extends BaseLib{
 
   def runMainIfFound(cls: String, args: Seq[String], classLoader: ClassLoader ): ExitCode = {
     if( classLoader.canLoad(cls) ){
-      runMain(cls, args, classLoader )
+      runMain(cls, args.drop(1), classLoader )
     } else ExitCode.Success
   }
 
