@@ -243,7 +243,7 @@ while true; do
         curr_command="$(echo $options | { read first rest ; echo $first ; })"
         which $curr_command 2>&1 > /dev/null
         option_available=$?
-        if [ ! $option_available -eq 0 ]; then
+        if [ ! $option_available -eq 0 ] && [ $curr_command != "cd" ]; then
           cbt "$options"
         else
           eval $options
