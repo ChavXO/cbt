@@ -36,10 +36,15 @@ class BuildBuild(context: Context) extends BasicBuild(context){
                 // otherwise we'd have to recursively build all versions since
                 // the beginning. Instead CBT always needs to build the pure Java
                 // Launcher in the checkout with itself and then run it via reflection.
-                new ProcessBuilder(checkoutDirectory.toString + "/cbt", "direct", "compile")
+                val process = new ProcessBuilder(checkoutDirectory.toString + "/cbt", "direct", "serializeDependencies")
                   .directory(new File(projectDirectory.toString.dropRight("/build".length)))
-                  .inheritIO
                   .start
+                process.waitFor
+                import java.io.{BufferedReader, InputStreamReader}
+                val reader = new BufferedReader( new InputStreamReader( process.getInputStream ))
+                val depString = reader.readLine
+                println(depString)
+                
                 cl
                   .loadClass( "cbt.NailgunLauncher" )
                   .getMethod( "getBuild", classOf[AnyRef] )
