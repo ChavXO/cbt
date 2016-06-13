@@ -29,23 +29,26 @@ class BuildBuild(context: Context) extends BasicBuild(context){
                 None
               else Some{
                 val checkoutDirectory = new GitDependency(base, hash).checkout
-                val build = new BasicBuild( context.copy( projectDirectory = checkoutDirectory ++ "/nailgun_launcher" ) )
-                val cl = build
-                  .classLoader(classLoaderCache)
                 // Note: cbt can't use an old version of itself for building,
                 // otherwise we'd have to recursively build all versions since
                 // the beginning. Instead CBT always needs to build the pure Java
                 // Launcher in the checkout with itself and then run it via reflection.
-                val newProjectDirectory = 
-                val process = new ProcessBuilder(checkoutDirectory.toString + "/cbt", "serializeDependencies")
-                  .directory(new File(projectDirectory.toString.dropRight("/build".length)))
+                val proj = new File(projectDirectory.toString.dropRight("/build".length))
+                val process = new ProcessBuilder(checkoutDirectory.toString + "/cbt", "direct", "serializeDependencies")
+                  .directory(proj)
                   .start
                 process.waitFor
                 import java.io.{BufferedReader, InputStreamReader}
-                import collection.JavaConvertors._
+                import collection.JavaConverters._
+                val buildContext = context.copy(projectDirectory = proj, cbtHome = checkoutDirectory)
                 val depString = new BufferedReader( new InputStreamReader( process.getInputStream )).readLine
-                val deps = depString.drop("Vector(".length).dropRight(1).split(",").map(MavenDependency.deserialize)
-                deps.map(println)
+                val deps = depString.drop("Vector(".length).dropRight(1).split(",").map(dependency => dependency match {
+                  case d if d.contains(':') => MavenDependency deserialize d
+                  case d                    => new BuildDependency(buildContext.copy( projectDirectory = new File(d) ))
+                })
+                val build = new BasicBuild(buildContext) 
+                build.dependencies :+ deps
+                build.asInstanceOf[BuildInterface]
               }
             }.getOrElse{
               classLoader(context.classLoaderCache)

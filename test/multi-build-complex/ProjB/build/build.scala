@@ -5,6 +5,6 @@ import scala.collection.immutable.Seq
 
 class Build( context: Context ) extends BasicBuild( context ){
   override def dependencies = {
-    super.dependencies ++ Seq( BuildDependency(new File("../../ProjB")))
+    super.dependencies ++ Seq( BuildDependency(new File(context.projectDirectory + "/../ProjC")))
     }
 }

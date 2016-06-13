@@ -55,7 +55,7 @@ class BasicBuild(val context: Context) extends DependencyImplementation with Bui
 
   def serializeDependencies = dependencies.map(x => x match {
       case m : BoundMavenDependency => m.mavenDependency.serialize
-      case d                   =>  ""
+      case d : BuildDependency      => d.serialize
     }
   )
 

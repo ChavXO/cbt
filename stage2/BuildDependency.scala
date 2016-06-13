@@ -27,7 +27,9 @@ case class BuildDependency(context: Context) extends TriggerLoop{
   def triggerLoopFiles = root.triggerLoopFiles
   override final val needsUpdate = build.needsUpdate
   def targetClasspath = ClassPath(Seq())
+  private[cbt] def serialize = context.projectDirectory.toString 
 }
+
 /*
 case class DependencyOr(first: BuildDependency, second: JavaDependency) extends ProjectProxy with BuildDependencyBase{
   val isFirst = new File(first.context.projectDirectory).exists
