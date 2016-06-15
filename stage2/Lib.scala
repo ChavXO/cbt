@@ -4,7 +4,7 @@ import java.io._
 import java.net._
 import java.lang.reflect.InvocationTargetException
 import java.nio.file.{Path =>_,_}
-import java.nio.file.Files.readAllBytes
+import java.nio.file.Files.{readAllBytes, deleteIfExists}
 import java.security.MessageDigest
 import java.util.jar._
 import java.lang.reflect.Method
@@ -161,13 +161,10 @@ final class Lib(logger: Logger) extends Stage1Lib(logger) with Scaffold{
       (
         if( thisTasks.nonEmpty ){
           s"""Methods provided by Build ${show}
-
   ${thisTasks.mkString("  ")}
-
 """
         } else ""
       ) ++ s"""Methods provided by CBT (but possibly overwritten)
-
   ${baseTasks.mkString("  ")}"""
       ) ++ "\n"
   }
@@ -217,6 +214,38 @@ final class Lib(logger: Logger) extends Stage1Lib(logger) with Scaffold{
           ExitCode.Failure
         }.getOrElse( ExitCode.Success )
       }
+    }
+  }
+
+  def clean (compileTarget : File, option: String) : ExitCode = {
+    /* recursively deletes folders*/
+    def deleteRecursive(file: File) : Boolean = {
+      if (file.isDirectory) {
+        file.listFiles().map(deleteRecursive(_))
+      }
+      deleteIfExists(file.toPath)
+    }
+
+    val delete = if (option != "-f" && option != "--here-goes-nothing") {
+      Option(System.console).getOrElse(
+        throw new Exception("Can't access Console. Try running cbt direct clean.")
+      ).readLine(
+        "Remove the following folder(s) [y/n]: \n" + compileTarget.toString + "\n"
+      ).head.toLower
+    } else 'y'
+
+    if (delete == 'y') {
+      logger.lib(s"""Cleaning ${compileTarget}""")
+      if (!compileTarget.exists) return ExitCode.Success
+      if (deleteRecursive(compileTarget)) {
+        logger.lib("Succeeded")
+        ExitCode.Success
+      } else {
+        logger.lib("Failed")
+        ExitCode.Failure
+      }
+    } else {
+      ExitCode.Failure
     }
   }
 
