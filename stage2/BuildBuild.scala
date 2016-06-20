@@ -33,22 +33,30 @@ class BuildBuild(context: Context) extends BasicBuild(context){
                 // otherwise we'd have to recursively build all versions since
                 // the beginning. Instead CBT always needs to build the pure Java
                 // Launcher in the checkout with itself and then run it via reflection.
-                val proj = new File(projectDirectory.toString.dropRight("/build".length))
+                val proj = projectDirectory.getParentFile
                 val process = new ProcessBuilder(checkoutDirectory.toString + "/cbt", "direct", "serializeDependencies")
                   .directory(proj)
                   .start
                 process.waitFor
-                import java.io.{BufferedReader, InputStreamReader}
-                import collection.JavaConverters._
                 val buildContext = context.copy(projectDirectory = proj, cbtHome = checkoutDirectory)
-                val depString = new BufferedReader( new InputStreamReader( process.getInputStream )).readLine
-                val deps = depString.drop("Vector(".length).dropRight(1).split(",").map(dependency => dependency match {
-                  case d if d.contains(':') => MavenDependency deserialize d
+                val depString = scala.io.Source.fromInputStream(process.getInputStream).mkString
+                val deps = depString.drop("Vector(".length).dropRight(1).split(",").map{ //depString.split("\n").map{
+                  case d if d.contains(':') => Resolver( mavenCentral ).bind( MavenDependency deserialize d).head
                   case d                    => new BuildDependency(buildContext.copy( projectDirectory = new File(d) ))
-                })
-                val build = new BasicBuild(buildContext) 
-                build.dependencies :+ deps
-                build.asInstanceOf[BuildInterface]
+                }
+                val build = new BuildInterface {
+                  def copy(context: cbt.Context): BuildInterface = lib.copy(context) // lib
+                  def crossScalaVersionsArray(): Array[String] = ??? // pass around
+                  def finalBuild(): BuildInterface = ??? // serialize build
+                  def scalaVersion(): String = ??? // pass
+                  def triggerLoopFilesArray(): Array[java.io.File] = ??? // pass around as well
+                  def dependenciesArray(): Array[Dependency] = deps.toArray
+                  def dependencyClasspathArray(): Array[java.io.File] = ??? // pass around
+                  def exportedClasspathArray(): Array[java.io.File] = ??? // pass
+                  def needsUpdateCompat() = ??? // pass
+                  def show(): String = ???
+                } 
+                build
               }
             }.getOrElse{
               classLoader(context.classLoaderCache)

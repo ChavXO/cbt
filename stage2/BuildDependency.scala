@@ -27,7 +27,6 @@ case class BuildDependency(context: Context) extends TriggerLoop{
   def triggerLoopFiles = root.triggerLoopFiles
   override final val needsUpdate = build.needsUpdate
   def targetClasspath = ClassPath(Seq())
-  private[cbt] def serialize = context.projectDirectory.toString 
 }
 
 /*

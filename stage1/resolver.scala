@@ -194,7 +194,7 @@ case class MavenDependency(
 }
 object MavenDependency{
   private[cbt] def deserialize = (_:String).split(":") match {
-    case col => MavenDependency( col(0), col(1), col(2), Classifier(col.lift(3)) )
+    case col => MavenDependency( col(0).trim, col(1).trim, col(2).trim, Classifier(col.lift(3)) )
   }
 }
 // FIXME: take MavenResolver instead of mavenCache and repositories separately

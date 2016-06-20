@@ -53,11 +53,11 @@ class BasicBuild(val context: Context) extends DependencyImplementation with Bui
       "org.scala-lang" % "scala-library" % scalaVersion
     )
 
-  def serializeDependencies = dependencies.map(x => x match {
-      case m : BoundMavenDependency => m.mavenDependency.serialize
-      case d : BuildDependency      => d.serialize
-    }
-  )
+  def serializeDependencies = dependencies.map{
+    case m : BoundMavenDependency => m.mavenDependency.serialize
+    case d : BuildDependency      => d.context.projectDirectory.toString
+  }.mkString("\n")
+
 
   // ========== paths ==========
   final private val defaultSourceDirectory = projectDirectory ++ "/src"
