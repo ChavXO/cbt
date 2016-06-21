@@ -90,7 +90,7 @@ object `package`{
       permanentClassLoaders,
       cache,
       cbtHome,
-      cbtRootHome,
+      cbtHome,
       compatibilityTarget,
       parentBuild.getOrElse(null)
     )

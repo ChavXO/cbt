@@ -41,6 +41,9 @@ class Stage1Lib( val logger: Logger ) extends BaseLib{
 
   def scalaMajorVersion(scalaMinorVersion: String) = scalaMinorVersion.split("\\.").take(2).mkString(".")
 
+  // =============== cli ==================
+  //def sh(command: String
+
   // ========== file system / net ==========
 
   def array2hex(padTo: Int, array: Array[Byte]): String = {
