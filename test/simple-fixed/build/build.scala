@@ -1,6 +1,4 @@
 import cbt._
-import scala.collection.immutable.Seq
-import java.io.File
 
 // cbt:https://github.com/cvogt/cbt.git#ca412e26d70a6615153136019b7966acb9939446
 class Build(context: cbt.Context) extends BasicBuild(context){
@@ -27,7 +25,7 @@ class Build(context: cbt.Context) extends BasicBuild(context){
     ).bind(
       "org.cvogt" %% "play-json-extensions" % "0.8.0",
       "org.tpolecat" %% "tut-core" % "0.4.2",
-      "ai.x" %% "lens" % "1.0.0-SNAPSHOT"
+      "ai.x" %% "lens" % "1.0.0"
     )
   )
 }

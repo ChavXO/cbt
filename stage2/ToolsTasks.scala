@@ -1,5 +1,4 @@
 package cbt
-import scala.collection.immutable.Seq
 import java.net._
 import java.io.{Console=>_,_}
 import java.nio.file._
@@ -67,8 +66,10 @@ class ToolsTasks(
     )
     
     val scalaXml = Dependencies(
-      Resolver(mavenCentral).bindOne(MavenDependency("org.scala-lang.modules","scala-xml_"+scalaMajorVersion,scalaXmlVersion)),
-      Resolver(mavenCentral).bindOne(MavenDependency("org.scala-lang","scala-library",scalaVersion))
+      Resolver(mavenCentral).bind(
+        MavenDependency("org.scala-lang.modules","scala-xml_"+scalaMajorVersion,scalaXmlVersion),
+        MavenDependency("org.scala-lang","scala-library",scalaVersion)
+      )
     )
 
     val zinc = Resolver(mavenCentral).bindOne(MavenDependency("com.typesafe.zinc","zinc",zincVersion))
@@ -137,7 +138,7 @@ ${assignments.mkString("\n")}
 }
 """
     val file = nailgun ++ ("/" ++ "EarlyDependencies.java")
-    Files.write( file.toPath, code.getBytes )
+    lib.write( file, code )
     println( Console.GREEN ++ "Wrote " ++ file.string ++ Console.RESET )
   }
 }

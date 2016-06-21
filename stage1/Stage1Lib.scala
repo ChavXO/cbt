@@ -12,8 +12,6 @@ import java.util.{Set=>_,Map=>_,_}
 import java.util.concurrent.ConcurrentHashMap
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 
-import scala.collection.immutable.Seq
-
 // CLI interop
 case class ExitCode(integer: Int)
 object ExitCode{
@@ -39,7 +37,7 @@ class Stage1Lib( val logger: Logger ) extends BaseLib{
   lib =>
   implicit val implicitLogger: Logger = logger
 
-  def scalaMajorVersion(scalaMinorVersion: String) = scalaMinorVersion.split("\\.").take(2).mkString(".")
+  def libMajorVersion(libFullVersion: String) = libFullVersion.split("\\.").take(2).mkString(".")
 
   // =============== cli ==================
   //def sh(command: String
@@ -56,6 +54,8 @@ class Stage1Lib( val logger: Logger ) extends BaseLib{
   def red(string: String) = scala.Console.RED++string++scala.Console.RESET
   def blue(string: String) = scala.Console.BLUE++string++scala.Console.RESET
   def green(string: String) = scala.Console.GREEN++string++scala.Console.RESET
+
+  def write(file: File, content: String, options: OpenOption*): File = Stage0Lib.write(file, content, options:_*)
 
   def download(url: URL, target: File, sha1: Option[String]): Boolean = {
     if( target.exists ){
@@ -234,7 +234,7 @@ ${files.sorted.mkString(" \\\n")}
         if(code == ExitCode.Success){
           // write version and when last compilation started so we can trigger
           // recompile if cbt version changed or newer source files are seen
-          Files.write(statusFile.toPath, "".getBytes)//cbtVersion.getBytes)
+          write(statusFile, "")//cbtVersion.getBytes)
           Files.setLastModifiedTime(statusFile.toPath, FileTime.fromMillis(start) )
         } else {
           System.exit(code.integer) // FIXME: let's find a better solution for error handling. Maybe a monad after all.
@@ -287,7 +287,7 @@ ${files.sorted.mkString(" \\\n")}
     } else {
       val result = compute
       val string = result.map(serialize).mkString("\n")
-      Files.write(cacheFile.toPath, string.getBytes)
+      write(cacheFile, string)
       result
     }
   }
@@ -338,7 +338,7 @@ ${files.sorted.mkString(" \\\n")}
     def dependencyClassLoader( latest: Map[(String,String),Dependency], cache: ClassLoaderCache ): ClassLoader = {
       if( dependency.dependencies.isEmpty ){
         // wrap for caching
-        new cbt.URLClassLoader( ClassPath(Seq()), ClassLoader.getSystemClassLoader().getParent() )
+        new cbt.URLClassLoader( ClassPath(), ClassLoader.getSystemClassLoader().getParent() )
       } else if( dependencies.size == 1 ){
         classLoaderRecursion( dependencies.head, latest, cache )
       } else{

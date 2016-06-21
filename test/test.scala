@@ -1,5 +1,4 @@
 import cbt._
-import scala.collection.immutable.Seq
 import java.util.concurrent.ConcurrentHashMap
 import java.io.File
 import java.net.URL
@@ -141,7 +140,7 @@ object Main{
       ++
       Dependencies(
         Resolver( mavenCentral, sonatypeSnapshots ).bind(
-          MavenDependency("ai.x","lens_2.11","1.0.0-SNAPSHOT")
+          MavenDependency("ai.x","lens_2.11","1.0.0")
         )
       ).classpath.strings
     ).foreach{
