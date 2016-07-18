@@ -198,18 +198,25 @@ final class Lib(logger: Logger) extends Stage1Lib(logger) with Scaffold{
 
   def clean (compileTarget : File, option: String) : ExitCode = {
     /* recursively deletes folders*/
-    def deleteRecursive(file: File) : Boolean = {
+    def deleteRecursive(file: File): Boolean = {
       if (file.isDirectory) {
-        file.listFiles().map(deleteRecursive(_))
+        file.listFiles.map(deleteRecursive(_))
       }
       deleteIfExists(file.toPath)
     }
 
-    val delete = if (option != "-f" && option != "--here-goes-nothing") {
+    def listFilesToDelete(file: File): Unit = {
+      if (file.isDirectory) {
+        file.listFiles.map(listFilesToDelete(_))
+      }
+      println(file.toString)
+    }
+    listFilesToDelete(compileTarget)
+    val delete = if (option != "-f") {
       Option(System.console).getOrElse(
-        throw new Exception("Can't access Console. Try running cbt direct clean.")
+        throw new Exception("Can't access Console. Try running `cbt direct clean` or `cbt clean -f`.")
       ).readLine(
-        "Remove the following folder(s) [y/n]: \n" + compileTarget.toString + "\n"
+        "Delete file(s) [y/n]: "
       ).head.toLower
     } else 'y'
 
